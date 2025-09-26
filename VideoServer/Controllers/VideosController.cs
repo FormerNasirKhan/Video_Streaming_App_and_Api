@@ -45,7 +45,7 @@ public class VideosController : ControllerBase
         if (file is null || !file.Exists) return NotFound();
 
         // enable HTTP range processing for seeking
-        var contentType = "application/octet-stream";
+        var contentType = "video/mp4";
         return PhysicalFile(file.FullName, contentType, enableRangeProcessing: true);
     }
 }
