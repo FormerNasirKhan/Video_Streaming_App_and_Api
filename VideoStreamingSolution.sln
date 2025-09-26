@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoApi", "VideoServer\VideoApi.csproj", "{D43BE622-D721-4D46-A109-697302477DD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoPlayer.Wpf", "VideoPlayer.Wpf\VideoPlayer.Wpf.csproj", "{5B1C1686-546C-44A0-94F3-1117E191EA98}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D43BE622-D721-4D46-A109-697302477DD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D43BE622-D721-4D46-A109-697302477DD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D43BE622-D721-4D46-A109-697302477DD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D43BE622-D721-4D46-A109-697302477DD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B1C1686-546C-44A0-94F3-1117E191EA98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B1C1686-546C-44A0-94F3-1117E191EA98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B1C1686-546C-44A0-94F3-1117E191EA98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B1C1686-546C-44A0-94F3-1117E191EA98}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D9511015-5A4A-4311-BC28-B961B906439A}
+	EndGlobalSection
+EndGlobal
