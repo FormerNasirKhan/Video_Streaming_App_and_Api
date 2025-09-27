@@ -40,6 +40,7 @@ public partial class MainWindow : Window
             }
         };
     }
+    //nasa
 
     protected override void OnClosed(EventArgs e)
     {
