@@ -3,48 +3,64 @@ using System.Windows;
 using System.Windows.Threading;
 using VideoPlayer.Wpf.ViewModels;
 
-namespace VideoPlayer.Wpf.Views;
-
-public partial class MainWindow : Window
+namespace VideoPlayer.Wpf.Views
 {
-    private DispatcherTimer _timer;
-    private MainViewModel Vm => (MainViewModel)DataContext;
-
-    public MainWindow()
+    public partial class MainWindow : Window
     {
-        InitializeComponent();
-        DataContext = new MainViewModel();
+        private readonly DispatcherTimer _timer;
+        private MainViewModel Vm => (MainViewModel)DataContext;
 
-        Vm.PlayRequested += () => Dispatcher.Invoke(() => { if (Player.Source != null) Player.Play(); });
-        Vm.PauseRequested += () => Dispatcher.Invoke(() => Player.Pause());
-        Vm.StopRequested += () => Dispatcher.Invoke(() => Player.Stop());
-
-        // Track position with timer
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        _timer.Tick += (s, e) =>
+        public MainWindow()
         {
-            if (Player.NaturalDuration.HasTimeSpan)
-            {
-                Vm.DurationSeconds = Player.NaturalDuration.TimeSpan.TotalSeconds;
-                Vm.PositionSeconds = Player.Position.TotalSeconds;
-            }
-        };
-        _timer.Start();
+            InitializeComponent();
+            DataContext = new MainViewModel();
 
-        // When user moves slider manually
-        Vm.PropertyChanged += (s, e) =>
+            // Hook up ViewModel events
+            Vm.PlayRequested += OnPlayRequested;
+            Vm.PauseRequested += OnPauseRequested;
+            Vm.StopRequested += OnStopRequested;
+            Vm.SeekRequested += OnSeekRequested;
+
+            // Timer for progress updates
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _timer.Tick += (s, e) =>
+            {
+                if (Player.NaturalDuration.HasTimeSpan)
+                {
+                    Vm.DurationSeconds = Player.NaturalDuration.TimeSpan.TotalSeconds;
+                    Vm.PositionSeconds = Player.Position.TotalSeconds;
+                }
+            };
+            _timer.Start();
+        }
+
+        private void OnPlayRequested()
         {
-            if (e.PropertyName == nameof(Vm.PositionSeconds) && Math.Abs(Player.Position.TotalSeconds - Vm.PositionSeconds) > 1)
+            if (Vm.SelectedVideo != null)
             {
-                Player.Position = TimeSpan.FromSeconds(Vm.PositionSeconds);
+                // Always set Source when playing new video
+                Player.Source = Vm.SelectedVideo.StreamUrl;
+                Player.Play();
             }
-        };
-    }
-    //nasa
+        }
 
-    protected override void OnClosed(EventArgs e)
-    {
-        Player.Close();
-        base.OnClosed(e);
+        private void OnPauseRequested() => Player.Pause();
+
+        private void OnStopRequested()
+        {
+            Player.Stop();
+            Player.Position = TimeSpan.Zero;
+        }
+
+        private void OnSeekRequested(double seconds)
+        {
+            Player.Position = TimeSpan.FromSeconds(seconds);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            Player.Close();
+            base.OnClosed(e);
+        }
     }
 }

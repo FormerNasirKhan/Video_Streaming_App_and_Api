@@ -45,7 +45,16 @@ public class MainViewModel : INotifyPropertyChanged
     public double PositionSeconds
     {
         get => _positionSeconds;
-        set { _positionSeconds = value; OnPropertyChanged(); }
+        set
+        {
+            if (Math.Abs(_positionSeconds - value) > 0.1)
+            {
+                _positionSeconds = value;
+                OnPropertyChanged();
+                // Let the View decide whether this came from slider
+                SeekRequested?.Invoke(_positionSeconds);
+            }
+        }
     }
 
     private double _durationSeconds;
@@ -63,7 +72,7 @@ public class MainViewModel : INotifyPropertyChanged
     public RelayCommand NextCommand { get; }
     public RelayCommand PreviousCommand { get; }
 
-    // Events for View (MediaElement listens to these)
+    // Events for View
     public event Action? PlayRequested;
     public event Action? PauseRequested;
     public event Action? StopRequested;
@@ -84,8 +93,8 @@ public class MainViewModel : INotifyPropertyChanged
             _ => IsPlaying);
 
         StopCommand = new RelayCommand(
-            _ => { StopRequested?.Invoke(); IsPlaying = false; },
-            _ => SelectedVideo != null);
+            _ => { StopRequested?.Invoke(); IsPlaying = false; PositionSeconds = 0; },
+            _ => SelectedVideo != null && IsPlaying);
 
         NextCommand = new RelayCommand(
             _ => NextVideo(),
@@ -98,7 +107,7 @@ public class MainViewModel : INotifyPropertyChanged
         _ = LoadVideos();
     }
 
-    private async Task LoadVideos()
+    public async Task LoadVideos()
     {
         Videos.Clear();
         var list = await _api.GetVideosAsync() ?? new();
@@ -106,14 +115,16 @@ public class MainViewModel : INotifyPropertyChanged
         SelectedVideo = Videos.FirstOrDefault();
     }
 
-    private void NextVideo()
+    public void NextVideo()
     {
         if (SelectedVideo == null) return;
         var idx = Videos.IndexOf(SelectedVideo);
         if (idx < Videos.Count - 1)
             SelectedVideo = Videos[idx + 1];
+
         PlayRequested?.Invoke();
         IsPlaying = true;
+        RaiseCommandStates();
     }
 
     private void PreviousVideo()
@@ -122,8 +133,10 @@ public class MainViewModel : INotifyPropertyChanged
         var idx = Videos.IndexOf(SelectedVideo);
         if (idx > 0)
             SelectedVideo = Videos[idx - 1];
+
         PlayRequested?.Invoke();
         IsPlaying = true;
+        RaiseCommandStates();
     }
 
     private bool CanNext() => SelectedVideo != null && Videos.IndexOf(SelectedVideo) < Videos.Count - 1;

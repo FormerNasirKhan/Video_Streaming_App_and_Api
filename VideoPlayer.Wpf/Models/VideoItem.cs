@@ -6,5 +6,5 @@ public class VideoItem
     public string DisplayName { get; set; } = "";
     public string FileName { get; set; } = "";
     public long SizeBytes { get; set; }
-    public string StreamUrl { get; set; } = "";
+    public Uri StreamUrl { get; set; }
 }
