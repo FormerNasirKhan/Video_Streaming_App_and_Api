@@ -3,43 +3,54 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Video Player" Height="600" Width="960">
     <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <!-- Left: Video list -->
+            <ColumnDefinition Width="*"/>
+            <!-- Right: Player -->
+        </Grid.ColumnDefinitions>
 
-        <!-- Left: list & controls -->
-        <DockPanel Grid.Column="0" Margin="0,0,8,0">
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0 0 0 8">
-                <Button Content="⟳ Refresh" Width="80" Margin="0 0 8 0" Command="{Binding RefreshCommand}" />
-                <Button Content="▶ Play" Width="60" Margin="0 0 8 0" Command="{Binding PlayCommand}" />
-                <Button Content="⏸ Pause" Width="60" Margin="0 0 8 0" Command="{Binding PauseCommand}" />
-                <Button Content="■ Stop" Width="60" Margin="0 0 8 0" Command="{Binding StopCommand}" />
-            </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <!-- Main content -->
+            <RowDefinition Height="Auto"/>
+            <!-- Buttons -->
+            <RowDefinition Height="Auto"/>
+            <!-- Seek bar -->
+        </Grid.RowDefinitions>
 
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0 0 0 8">
-                <Button Content="⏮ Prev" Width="60" Margin="0 0 8 0" Command="{Binding PreviousCommand}" />
-                <Button Content="⏭ Next" Width="60" Command="{Binding NextCommand}" />
-            </StackPanel>
+        <!-- Video list (left side) -->
+        <ListBox Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
+                 ItemsSource="{Binding Videos}"
+                 SelectedItem="{Binding SelectedVideo}"
+                 DisplayMemberPath="DisplayName"
+                 HorizontalContentAlignment="Stretch" />
 
-            <ListBox ItemsSource="{Binding Videos}"
-                     SelectedItem="{Binding SelectedVideo}"
-                     DisplayMemberPath="DisplayName"
-                     HorizontalContentAlignment="Stretch" />
-        </DockPanel>
+        <!-- Video player (right side) -->
+        <MediaElement x:Name="Player"
+                      Grid.Row="0" Grid.Column="1"
+                      Height="400"
+                      LoadedBehavior="Play" UnloadedBehavior="Manual"
+                      Stretch="Uniform"
+                      Source="{Binding SelectedVideo.StreamUrl}" />
 
-        <!-- Right: video & seek bar -->
-        <DockPanel Grid.Column="1">
-            <MediaElement x:Name="Player"
-                          DockPanel.Dock="Top"
-                          Height="400"
-                          LoadedBehavior="Play" UnloadedBehavior="Manual"
-                          Stretch="Uniform"
-                          Source="{Binding SelectedVideo.StreamUrl}" />
+        <!-- Buttons at bottom (row 1, right side) -->
+        <UniformGrid Grid.Row="1" Grid.Column="1" Rows="1" Columns="6" Margin="0,8,0,8">
+            <Button Content="⟳ Refresh" Command="{Binding RefreshCommand}" />
+            <Button Content="▶ Play" Command="{Binding PlayCommand}" />
+            <Button Content="⏸ Pause" Command="{Binding PauseCommand}" />
+            <Button Content="■ Stop" Command="{Binding StopCommand}" />
+            <Button Content="⏮ Prev" Command="{Binding PreviousCommand}" />
+            <Button Content="⏭ Next" Command="{Binding NextCommand}" />
+        </UniformGrid>
 
-            <!-- Seek Bar -->
-            <Slider Minimum="0"
-                    Maximum="{Binding DurationSeconds}"
-                    Value="{Binding PositionSeconds, Mode=TwoWay}"
-                    Margin="0,8"
-                    TickFrequency="1"
-                    IsSnapToTickEnabled="True"/>
-        </DockPanel>
+        <!-- Seek Bar at bottom (row 2, right side) -->
+        <Slider Grid.Row="2" Grid.Column="1"
+                Minimum="0"
+                Maximum="{Binding DurationSeconds}"
+                Value="{Binding PositionSeconds, Mode=TwoWay}"
+                Margin="0,8,0,0"
+                TickFrequency="1"
+                IsSnapToTickEnabled="True"/>
     </Grid>
 </Window>
