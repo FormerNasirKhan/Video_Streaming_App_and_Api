@@ -15,10 +15,32 @@ public class MainViewModel : INotifyPropertyChanged
     public VideoItem? SelectedVideo
     {
         get => _selectedVideo;
-        set { _selectedVideo = value; OnPropertyChanged(); }
+        set
+        {
+            if (_selectedVideo != value)
+            {
+                _selectedVideo = value;
+                OnPropertyChanged();
+                RaiseCommandStates();
+            }
+        }
     }
 
-    // Position (binds to slider)
+    private bool _isPlaying;
+    public bool IsPlaying
+    {
+        get => _isPlaying;
+        set
+        {
+            if (_isPlaying != value)
+            {
+                _isPlaying = value;
+                OnPropertyChanged();
+                RaiseCommandStates();
+            }
+        }
+    }
+
     private double _positionSeconds;
     public double PositionSeconds
     {
@@ -33,6 +55,7 @@ public class MainViewModel : INotifyPropertyChanged
         set { _durationSeconds = value; OnPropertyChanged(); }
     }
 
+    // Commands
     public RelayCommand RefreshCommand { get; }
     public RelayCommand PlayCommand { get; }
     public RelayCommand PauseCommand { get; }
@@ -40,7 +63,7 @@ public class MainViewModel : INotifyPropertyChanged
     public RelayCommand NextCommand { get; }
     public RelayCommand PreviousCommand { get; }
 
-    // Events for View
+    // Events for View (MediaElement listens to these)
     public event Action? PlayRequested;
     public event Action? PauseRequested;
     public event Action? StopRequested;
@@ -51,11 +74,26 @@ public class MainViewModel : INotifyPropertyChanged
         _api = new ApiClient("http://localhost:5282");
 
         RefreshCommand = new RelayCommand(async _ => await LoadVideos());
-        PlayCommand = new RelayCommand(_ => PlayRequested?.Invoke(), _ => SelectedVideo != null);
-        PauseCommand = new RelayCommand(_ => PauseRequested?.Invoke());
-        StopCommand = new RelayCommand(_ => StopRequested?.Invoke());
-        NextCommand = new RelayCommand(_ => NextVideo(), _ => CanNext());
-        PreviousCommand = new RelayCommand(_ => PreviousVideo(), _ => CanPrevious());
+
+        PlayCommand = new RelayCommand(
+            _ => { PlayRequested?.Invoke(); IsPlaying = true; },
+            _ => SelectedVideo != null && !IsPlaying);
+
+        PauseCommand = new RelayCommand(
+            _ => { PauseRequested?.Invoke(); IsPlaying = false; },
+            _ => IsPlaying);
+
+        StopCommand = new RelayCommand(
+            _ => { StopRequested?.Invoke(); IsPlaying = false; },
+            _ => SelectedVideo != null);
+
+        NextCommand = new RelayCommand(
+            _ => NextVideo(),
+            _ => CanNext());
+
+        PreviousCommand = new RelayCommand(
+            _ => PreviousVideo(),
+            _ => CanPrevious());
 
         _ = LoadVideos();
     }
@@ -75,6 +113,7 @@ public class MainViewModel : INotifyPropertyChanged
         if (idx < Videos.Count - 1)
             SelectedVideo = Videos[idx + 1];
         PlayRequested?.Invoke();
+        IsPlaying = true;
     }
 
     private void PreviousVideo()
@@ -84,12 +123,21 @@ public class MainViewModel : INotifyPropertyChanged
         if (idx > 0)
             SelectedVideo = Videos[idx - 1];
         PlayRequested?.Invoke();
+        IsPlaying = true;
     }
 
     private bool CanNext() => SelectedVideo != null && Videos.IndexOf(SelectedVideo) < Videos.Count - 1;
     private bool CanPrevious() => SelectedVideo != null && Videos.IndexOf(SelectedVideo) > 0;
 
-    // Raise property changed
+    private void RaiseCommandStates()
+    {
+        PlayCommand.RaiseCanExecuteChanged();
+        PauseCommand.RaiseCanExecuteChanged();
+        StopCommand.RaiseCanExecuteChanged();
+        NextCommand.RaiseCanExecuteChanged();
+        PreviousCommand.RaiseCanExecuteChanged();
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
