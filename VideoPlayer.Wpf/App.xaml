@@ -1,6 +1,9 @@
 ﻿<Application x:Class="VideoPlayer.Wpf.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="Views/MainWindow.xaml">
-    <Application.Resources/>
+             xmlns:infra="clr-namespace:VideoPlayer.Wpf.Infrastructure"
+             StartupUri="Views/LoginWindow.xaml">
+    <Application.Resources>
+       <!--<infra:BoolToVisibilityConverter x:Key="BoolToVisibility"/>-->
+    </Application.Resources>
 </Application>
